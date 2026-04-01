@@ -346,10 +346,10 @@
         </div>
       </div>
       <nav class="nav">
-        <a href="/main" data-route-link="/main">主頁</a>
-        <a href="/msg" data-route-link="/msg">訊息規則</a>
-        <a href="/format" data-route-link="/format">格式總覽</a>
-        <a href="/examples" data-route-link="/examples">範例</a>
+        <a href="./main" data-route-link="/main">主頁</a>
+        <a href="./msg" data-route-link="/msg">訊息規則</a>
+        <a href="./format" data-route-link="/format">格式總覽</a>
+        <a href="./examples" data-route-link="/examples">範例</a>
       </nav>
     </div>
   </header>
@@ -634,45 +634,41 @@
     (function () {
       const routes = Array.from(document.querySelectorAll('.route'));
       const links = Array.from(document.querySelectorAll('[data-route-link]'));
-
-      function normalize(path) {
-        if (!path || path === '/') return '/main';
-        if (!path.startsWith('/')) return '/' + path;
-        return path.replace(/\/$/, '') || '/main';
-      }
-
-      function showRoute(path) {
-        const target = normalize(path);
+  
+      function showRoute() {
+        const hash = window.location.hash || '#/main';
+        const path = hash.replace(/^#/, ''); // 去掉 #
+        
         routes.forEach(section => {
-          section.classList.toggle('active', section.dataset.route === target);
+          section.classList.toggle('active', section.dataset.route === path);
         });
+  
         links.forEach(link => {
-          link.classList.toggle('active', normalize(link.getAttribute('data-route-link')) === target);
+          link.classList.toggle(
+            'active',
+            link.getAttribute('data-route-link') === path
+          );
         });
+  
         document.title = ({
           '/main': 'DC 訊息格式說明｜主頁',
           '/msg': 'DC 訊息格式說明｜訊息規則',
           '/format': 'DC 訊息格式說明｜格式總覽',
           '/examples': 'DC 訊息格式說明｜範例'
-        })[target] || 'DC 訊息格式說明';
+        })[path] || 'DC 訊息格式說明';
       }
-
-      function currentPath() {
-        return normalize(window.location.pathname);
-      }
-
+  
       links.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          const path = normalize(link.getAttribute('data-route-link'));
-          history.pushState({}, '', path);
-          showRoute(path);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          const target = link.getAttribute('data-route-link');
+          window.location.hash = target;
+          showRoute();
         });
       });
-
-      window.addEventListener('popstate', () => showRoute(currentPath()));
-      showRoute(currentPath());
+  
+      window.addEventListener('hashchange', showRoute);
+      showRoute();
     })();
   </script>
 </body>
